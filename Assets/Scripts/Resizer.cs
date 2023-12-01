@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
-using UnityEditor.Build;
 using UnityEngine;
 
 public class Resizer : MonoBehaviour

@@ -34,6 +34,7 @@ public class ProgressManager : MonoBehaviour
     IEnumerator RestartLevelCoroutine()
     {
         // Fade to black
+        Time.timeScale = 0.0f;
         transitionScreen.gameObject.SetActive(true);
         while (transitionScreen.color.a < 1)
         {
@@ -43,7 +44,7 @@ public class ProgressManager : MonoBehaviour
                     transitionScreen.color.g,
                     transitionScreen.color.b,
                     transitionScreen.color.a + 0.02f);
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSecondsRealtime(0.01f);
         }
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -57,9 +58,10 @@ public class ProgressManager : MonoBehaviour
                     transitionScreen.color.g,
                     transitionScreen.color.b,
                     transitionScreen.color.a - 0.02f);
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSecondsRealtime(0.01f);
         }
         transitionScreen.gameObject.SetActive(false);
+        Time.timeScale = 1.0f;
     }
 
     public void LoadNextLevel()
@@ -70,6 +72,7 @@ public class ProgressManager : MonoBehaviour
     IEnumerator LoadNextLevelCoroutine()
     {
         // Fade to black
+        Time.timeScale = 0.0f;
         transitionScreen.gameObject.SetActive(true);
         while (transitionScreen.color.a < 1)
         {
@@ -79,7 +82,7 @@ public class ProgressManager : MonoBehaviour
                     transitionScreen.color.g,
                     transitionScreen.color.b,
                     transitionScreen.color.a + 0.02f);
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSecondsRealtime(0.01f);
         }
 
         switch (SceneManager.GetActiveScene().name)
@@ -98,8 +101,9 @@ public class ProgressManager : MonoBehaviour
                     transitionScreen.color.g,
                     transitionScreen.color.b,
                     transitionScreen.color.a - 0.02f);
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSecondsRealtime(0.01f);
         }
         transitionScreen.gameObject.SetActive(false);
+        Time.timeScale = 1.0f;
     }
 }
