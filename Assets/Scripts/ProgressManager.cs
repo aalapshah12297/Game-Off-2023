@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class ProgressManager : MonoBehaviour
 {
+    public AudioSource music1, music2;
     private Image transitionScreen;
     // Start is called before the first frame update
     void Start()
@@ -87,9 +88,14 @@ public class ProgressManager : MonoBehaviour
 
         switch (SceneManager.GetActiveScene().name)
         {
-            case "Title Screen": SceneManager.LoadScene("Level 01"); break;
-            case "Level 01": SceneManager.LoadScene("Level 02"); break;
-            case "Level 02": SceneManager.LoadScene("Credits"); break;
+            case "Title Screen": SceneManager.LoadScene("Level 01"); 
+                break;
+            case "Level 01": SceneManager.LoadScene("Level 02"); 
+                music1.enabled = false;
+                music2.enabled = true;
+                break;
+            case "Level 02": SceneManager.LoadScene("Credits"); 
+                break;
         }
 
         // Fade from black
