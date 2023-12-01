@@ -10,6 +10,7 @@ public class GunController : MonoBehaviour
     public float maxDistance;
     public float gunTimeoutDuration;
     public SpriteRenderer blueLaser, redLaser;
+    public AudioSource blueLaserFire, redLaserFire, blueLaserGrow, redLaserShrink, laserError;
     // Note that both lasers should be children of the gun gameobject,
     // have same origin, transform.position.y = 0 and global scale of 1
 
@@ -55,6 +56,7 @@ public class GunController : MonoBehaviour
             queueGrow = false; queueShrink = false; // Remove used clicks
             gunFiringStartTime = Time.time;
             currentState = ControlState.firingGrow;
+            blueLaserFire.Play();
         }
         if (currentState == ControlState.lockedGrowing && !Input.GetMouseButton(0))
             timeout = true;
@@ -66,6 +68,7 @@ public class GunController : MonoBehaviour
             queueGrow = false; queueShrink = false; // Remove used clicks
             gunFiringStartTime = Time.time;
             currentState = ControlState.firingShrink;
+            redLaserFire.Play();
         }
         if (currentState == ControlState.lockedShrinking && !Input.GetMouseButton(1))
             timeout = true;
@@ -98,6 +101,10 @@ public class GunController : MonoBehaviour
                 {
                     laserHitCube = laserHitPoint.collider.gameObject;
                     currentState++; // firing -> locked
+                    if (currentState == ControlState.lockedGrowing)
+                        blueLaserGrow.Play();
+                    else if (currentState == ControlState.lockedShrinking)
+                        redLaserShrink.Play();
                 }
                 else
                     timeout = true;
@@ -123,6 +130,8 @@ public class GunController : MonoBehaviour
         {
             blueLaser.size = new Vector2(0, blueLaser.size.y);
             redLaser.size = new Vector2(0, redLaser.size.y);
+            blueLaserGrow.Stop();
+            redLaserShrink.Stop();
             previousWaitTime = Time.time;
             currentState = ControlState.wait;
         }
@@ -157,6 +166,9 @@ public class GunController : MonoBehaviour
         {
             blueLaser.size = new Vector2(0, blueLaser.size.y);
             redLaser.size = new Vector2(0, redLaser.size.y);
+            blueLaserGrow.Stop();
+            redLaserShrink.Stop();
+            laserError.Play();
             previousWaitTime = Time.time;
             currentState = ControlState.wait;
         }

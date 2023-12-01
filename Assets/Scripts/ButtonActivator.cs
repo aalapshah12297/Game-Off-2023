@@ -10,6 +10,7 @@ public class ButtonActivator : MonoBehaviour
     public float activationThresholdY;
     public float activationTime, deactivationTime;
     public SpriteRenderer indicator;
+    public AudioSource buttonDown, buttonUp;
 
     private bool timerStarted = false;
     private float thresholdCrossTime;
@@ -44,6 +45,7 @@ public class ButtonActivator : MonoBehaviour
                 timerStarted = false;
                 buttonActivated = true;
                 indicator.color = Color.red;
+                buttonDown.Play();
             }
         }
         else if (buttonActivated && transform.localPosition.y > activationThresholdY)
@@ -58,6 +60,7 @@ public class ButtonActivator : MonoBehaviour
                 timerStarted = false;
                 buttonActivated = false;
                 indicator.color = Color.black;
+                buttonUp.Play();
             }
         }
         else
