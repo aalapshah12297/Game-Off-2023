@@ -1,31 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 public class GunControllerAutomatic : MonoBehaviour
 {
     public float gunFiringSpeed;
     public float maxDistance;
-    public float gunTimeoutDuration;
+    public float growStartTime, growEndTime, shrinkStartTime, shrinkEndTime, cycleLength;
+    // Following two intervals must be non-overlapping and contained within [0, cycleLength]
+    // [growStartTime, growEndTime]
+    // [shrinkStartTime, shrinkEndTime]
+    // Set growStartTime or shrinkStartTime > cycleLength to disable grow or shrink
     public SpriteRenderer blueLaser, redLaser;
     public AudioSource blueLaserFire, redLaserFire, blueLaserGrow, redLaserShrink, laserError;
-    public Vector2 gunDirection;
-    public float cycleLength; // > 2 * (growShrinkTime + gunTimeoutDuration)
-    public float growShrinkTime;
     // Note that both lasers should be children of the gun gameobject,
     // have same origin, transform.position.y = 0 and global scale of 1
 
     enum ControlState { ready, firingGrow, lockedGrowing, firingShrink, lockedShrinking, wait }
     private ControlState currentState;
+    private Vector2 gunDirection;
     private float gunFiringStartTime;
     RaycastHit2D laserHitPoint;
     private GameObject laserHitCube;
-    private float previousWaitTime;
+    private float nextReadyTime;
 
     // Start is called before the first frame update
     void Start()
     {
         currentState = ControlState.ready;
+        gunDirection = transform.rotation * Vector2.right;
         gunDirection.Normalize();
         transform.rotation = Quaternion.Euler(
             0, 0, Mathf.Rad2Deg * Mathf.Atan2(gunDirection.y, gunDirection.x));
@@ -38,28 +42,28 @@ public class GunControllerAutomatic : MonoBehaviour
 
         // Timed grow
         if (currentState == ControlState.ready &&
-            Time.time % cycleLength >= 0.0f &&
-            Time.time % cycleLength < growShrinkTime)
+            Time.time % cycleLength >= growStartTime &&
+            Time.time % cycleLength < growEndTime)
         {
             gunFiringStartTime = Time.time;
             currentState = ControlState.firingGrow;
             blueLaserFire.Play();
         }
         if (currentState == ControlState.lockedGrowing &&
-            Time.time % cycleLength >= growShrinkTime)
+            Time.time % cycleLength >= growEndTime)
             timeout = true;
 
         // Timed shrink
         if (currentState == ControlState.ready &&
-            Time.time % cycleLength >= 0.5f * cycleLength &&
-            Time.time % cycleLength < 0.5f * cycleLength + growShrinkTime)
+            Time.time % cycleLength >= shrinkStartTime &&
+            Time.time % cycleLength < shrinkEndTime)
         {
             gunFiringStartTime = Time.time;
             currentState = ControlState.firingShrink;
             redLaserFire.Play();
         }
         if (currentState == ControlState.lockedShrinking &&
-            Time.time % cycleLength >= 0.5f * cycleLength + growShrinkTime)
+            Time.time % cycleLength >= shrinkEndTime)
             timeout = true;
 
         // Laser firing
@@ -121,11 +125,17 @@ public class GunControllerAutomatic : MonoBehaviour
             redLaser.size = new Vector2(0, redLaser.size.y);
             blueLaserGrow.Stop();
             redLaserShrink.Stop();
-            previousWaitTime = Time.time;
+            if (Time.time % cycleLength >= growStartTime &&
+                Time.time % cycleLength < growEndTime)
+                nextReadyTime = Time.time + growEndTime - (Time.time % cycleLength);
+            else if (Time.time % cycleLength >= shrinkStartTime &&
+                Time.time % cycleLength < shrinkEndTime)
+                nextReadyTime = Time.time + shrinkEndTime - (Time.time % cycleLength);
+            else
+                nextReadyTime = Time.time;
             currentState = ControlState.wait;
         }
-        else if (currentState == ControlState.wait &&
-            Time.time - previousWaitTime >= gunTimeoutDuration)
+        else if (currentState == ControlState.wait && Time.time > nextReadyTime)
             currentState = ControlState.ready;
     }
 
@@ -158,7 +168,14 @@ public class GunControllerAutomatic : MonoBehaviour
             blueLaserGrow.Stop();
             redLaserShrink.Stop();
             laserError.Play();
-            previousWaitTime = Time.time;
+            if (Time.time % cycleLength >= growStartTime &&
+                Time.time % cycleLength < growEndTime)
+                nextReadyTime = Time.time + growEndTime - (Time.time % cycleLength);
+            else if (Time.time % cycleLength >= shrinkStartTime &&
+                Time.time % cycleLength < shrinkEndTime)
+                nextReadyTime = Time.time + shrinkEndTime - (Time.time % cycleLength);
+            else
+                nextReadyTime = Time.time;
             currentState = ControlState.wait;
         }
     }
