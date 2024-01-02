@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlatformMover : MonoBehaviour
+public class PlatformController : MonoBehaviour
 {
     public ButtonActivator activator;
     public GameObject initialPosition, finalPosition;
